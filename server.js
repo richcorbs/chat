@@ -8,13 +8,17 @@ var mem = process.memoryUsage();
 // every 10 seconds poll for the memory.
 setInterval(function () {
   mem = process.memoryUsage();
-}, 10*1000);
+}, 20*1000);
 
 
-var fu = require("./fu"),
-    sys = require("sys"),
-    url = require("url"),
-    qs = require("querystring");
+var fu         = require("./fu"),
+    fs         = require("fs"),
+    multipart  = require("multipart"),
+    sys        = require("sys"),
+    url        = require("url"),
+    util       = require("util"),
+    formidable = require ("formidable"),
+    qs         = require("querystring");
 
 var MESSAGE_BACKLOG = 200,
     SESSION_TIMEOUT = 60 * 1000;
@@ -107,6 +111,36 @@ function createSession (nick) {
   return session;
 }
 
+function upload_file(req, res) {
+    //console.log('>>> start of upload');
+    //console.log(req['headers']);
+    var form = new formidable.IncomingForm(),
+        files = [],
+        fields = [];
+
+    form.uploadDir = "./files/";
+
+    form
+      .on('field', function(field, value) {
+        //console.log(field, value);
+        fields.push([field, value]);
+      })
+      .on('file', function(field, file) {
+        //console.log(field, file);
+        files.push([field, file]);
+        fs.rename(file['path'], 'files/' + file['name']);
+        fu.get("/files/" + file['name'], fu.staticHandler("/files/" + file['name']));
+      })
+      .on('end', function() {
+        //console.log('-> upload done');
+        res.writeHead(200, {'content-type' : 'text/xml'});
+        res.write('<?xml version="1.0"?><result>1</result>');
+        res.end('<?xml version="1.0"?><result>1</result>');
+        return;
+      });
+    form.parse(req);
+}
+
 // interval to kill off old sessions
 setInterval(function () {
   var now = new Date();
@@ -123,10 +157,16 @@ setInterval(function () {
 fu.listen(Number(process.env.PORT || PORT), HOST);
 
 fu.get("/", fu.staticHandler("index.html"));
+fu.get("/test.html", fu.staticHandler("test.html"));
 fu.get("/style.css", fu.staticHandler("style.css"));
+fu.get("/background.png", fu.staticHandler("background.png"));
 fu.get("/client.js", fu.staticHandler("client.js"));
+fu.get("/ajaxfileupload.js", fu.staticHandler("ajaxfileupload.js"));
+fu.get("/jquery.js", fu.staticHandler("jquery.js"));
+fu.get("/jquery.form.js", fu.staticHandler("jquery.form.js"));
 fu.get("/jquery-1.2.6.min.js", fu.staticHandler("jquery-1.2.6.min.js"));
 
+fu
 
 fu.get("/who", function (req, res) {
   var nicks = [];
@@ -140,9 +180,15 @@ fu.get("/who", function (req, res) {
                       });
 });
 
+fu.get("/filelist", function (req, res) {
+  var myfiles = fs.readdirSync("./files");
+  res.simpleJSON(200, { files: myfiles });
+});
+
 fu.get("/join", function (req, res) {
   var nick = qs.parse(url.parse(req.url).query).nick;
-  if (nick == null || nick.length == 0) {
+  var pw   = qs.parse(url.parse(req.url).query).pass;
+  if (nick == null || nick.length == 0 || pw != "onlinepayday") {
     res.simpleJSON(400, {error: "Bad nick."});
     return;
   }
@@ -160,6 +206,40 @@ fu.get("/join", function (req, res) {
                       , rss: mem.rss
                       , starttime: starttime
                       });
+});
+
+fu.post("/githubpush/81bb5309347727cdb871e3ad164acf18", function (req, res) {
+  var body = '';
+  req.addListener('data', function(chunk) {
+    body += chunk;
+  }).addListener('end', function() {
+    res.end( 'thank you');
+    var payload = JSON.parse(qs.parse(body).payload);
+    repo  = payload.repository.name;
+    after = payload.after;
+    for (var c in payload.commits) {
+      who   = payload.commits[c].author.name;
+      msg   = payload.commits[c].message;
+      console.log(who + ' committed \"' + msg + '\" to ' + repo + ' (' + after + ')');
+      channel.appendMessage("github", "github", who + ' committed \"' + msg + '\" to ' + repo + ' (' + after + ')', "notice");
+    }
+  });
+});
+
+fu.post("/deploynotice/ca1e280145877cd656bc69eb99d3a4c3", function (req, res) {
+  var body = '';
+  req.addListener('data', function(chunk) {
+    body += chunk;
+  }).addListener('end', function() {
+    res.end( 'thank you');
+    var msg = qs.parse(body).deploy;
+    console.log(msg);
+    channel.appendMessage("deploy", "deploy", msg, "notice");
+  });
+  // RUBY
+  // require 'net/http'
+  // uername = `echo $USER`.strip
+  // res = Net::HTTP.post_form(URI.parse('http://localhost:8001/deploynotice'), {"deploy" => "${username} deployed to PLT"})
 });
 
 fu.get("/part", function (req, res) {
@@ -207,3 +287,9 @@ fu.get("/send", function (req, res) {
   channel.appendMessage(session.nick, "msg", text);
   res.simpleJSON(200, { rss: mem.rss });
 });
+
+fu.post("/upload", function (req, res) {
+  //console.log(req.headers);
+  upload_file(req, res);
+});
+

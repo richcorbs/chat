@@ -1,18 +1,21 @@
 body {
+  background: #000 url('background.png') repeat;
   padding: 0;
   margin: 0;
 }
 body, #entry {
   background: #22252a;
+  background: #000 url('background.png') repeat;
   color: #eee;
 }
 body, table {
   font-family: DejaVu Sans Mono, fixed; 
   font-size: 14pt;
-  line-height: 150%;
+  line-height: 120%;
+  margin: 0;
 }
 tr,td,table {
-  padding: 0;
+  padding: 0 5px;
   margin: 0;
   outline-width: 0;
   border-width: 0;
@@ -50,13 +53,13 @@ a:hover { text-decoration: underline; color: #aaa; }
   color: #fff;
   width: 100%; 
   bottom: 0;
-  background: #733;
+  background: #333;
 }
 
 #entry {
   width: 100%;
   font-size: inherit;
-  padding: 1em;
+  padding: 0.5em;
   margin: 0;
   border-width: 0;
   outline-width: 0;
@@ -72,12 +75,16 @@ a:hover { text-decoration: underline; color: #aaa; }
 }
 
 /* not very important info */
-.notice td, .join td, .part td, .message .date { color: #555; }
-.error td { color: #933; }
-.personal .nick, .notice .nick { color: #cd5; }
+table.message { width:100%; border-bottom:1px solid #444; }
+td.date { width:50px; }
+td.nick { width:75px; }
+.notice td, .join td, .part td, .message .date { color: #999; }
+.error td { color: #B00; }
+.personal .nick, .notice .nick { color: khaki; }
 
+input#uploadFile { background-color:#333; border: none; color: #333; margin-top:5px; }
 .message {
-  margin: 0.1em 0;
+  margin: 0.1em 3px;
 }
 
 .message td {
@@ -95,7 +102,7 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #toolbar ul {
   margin: 0;
-  padding: 0;
+  padding: 0 10px;
   list-style: none;
 }
 
@@ -103,8 +110,9 @@ a:hover { text-decoration: underline; color: #aaa; }
   display: block; 
   float: left;
   margin: 0 2em 0 0;
+  padding-left:10px;
 }
 
-#usersLink {
+#usersLink, #filesLink {
   color: inherit;
 }

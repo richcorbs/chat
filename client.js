@@ -6,7 +6,8 @@ var CONFIG = { debug: false
              , unread: 0 //updated in the message-processing loop
              };
 
-var nicks = [];
+var nicks   = [];
+var myFiles = [];
 
 //  CUT  ///////////////////////////////////////////////////////////////////
 /* This license and copyright apply to all code until the next "CUT"
@@ -112,6 +113,11 @@ function updateUsersLink ( ) {
   var t = nicks.length.toString() + " user";
   if (nicks.length != 1) t += "s";
   $("#usersLink").text(t);
+}
+function updateFilesLink ( ) {
+  var t = myFiles.length.toString() + " file";
+  if (myFiles.length != 1) t += "s";
+  $("#filesLink").text(t);
 }
 
 //handles another person joining chat
@@ -225,9 +231,9 @@ function addMessage (from, text, time, _class) {
   text = text.replace(util.urlRE, '<a target="_blank" href="$&">$&</a>');
 
   var content = '<tr>'
-              + '  <td class="date">' + util.timeString(time) + '</td>'
               + '  <td class="nick">' + util.toStaticHTML(from) + '</td>'
               + '  <td class="msg-text">' + text  + '</td>'
+              + '  <td class="date">' + util.timeString(time) + '</td>'
               + '</tr>'
               ;
   messageElement.html(content);
@@ -268,10 +274,10 @@ function longPoll (data) {
     return;
   }
 
-  if (data && data.rss) {
-    rss = data.rss;
-    updateRSS();
-  }
+  //if (data && data.rss) {
+    //rss = data.rss;
+    //updateRSS();
+  //}
 
   //process any updates we may have
   //data will be null on the first call of longPoll
@@ -292,6 +298,14 @@ function longPoll (data) {
           addMessage(message.nick, message.text, message.timestamp);
           break;
 
+        case "github":
+          outputGithub(message.text);
+          break;
+
+        case "deploy":
+          outputDeploy(message.text);
+          break;
+
         case "join":
           userJoin(message.nick, message.timestamp);
           break;
@@ -308,6 +322,7 @@ function longPoll (data) {
     if (first_poll) {
       first_poll = false;
       who();
+      filelist();
     }
   }
 
@@ -396,7 +411,9 @@ function onConnect (session) {
   CONFIG.id   = session.id;
   starttime   = new Date(session.starttime);
   rss         = session.rss;
-  updateRSS();
+  updateUsersLink();
+  updateFilesLink();
+  //updateRSS();
   updateUptime();
 
   //update the UI to show the chat
@@ -415,10 +432,35 @@ function onConnect (session) {
   });
 }
 
+//output github messages
+function outputGithub (msg) {
+  addMessage("github:", msg, new Date(), "personal notice");
+  return false;
+}
+
+//output deploy messages
+function outputDeploy (msg) {
+  addMessage("deploy:", msg, new Date(), "personal notice");
+  return false;
+}
+
 //add a list of present chat members to the stream
 function outputUsers () {
   var nick_string = nicks.length > 0 ? nicks.join(", ") : "(none)";
-  addMessage("users:", nick_string, new Date(), "notice");
+  addMessage("users:", nick_string, new Date(), "\"notice");
+  updateUsersLink();
+  return false;
+}
+
+//add a list of current files to the system
+function outputFiles () {
+  var file_string = [];
+  for (myFile in myFiles) {
+    file_string.push(document.location.protocol + "//" + document.location.host + "/files/" + myFiles[myFile]);
+  }
+  file_string = file_string.length > 0 ? file_string.join(" | ") : "(none)";
+  addMessage("files:", file_string, new Date(), "notice");
+  updateFilesLink();
   return false;
 }
 
@@ -428,6 +470,15 @@ function who () {
     if (status != "success") return;
     nicks = data.nicks;
     outputUsers();
+  }, "json");
+}
+
+//get a list of the files currently in the system and add it to the stream
+function filelist () {
+  jQuery.get("/filelist", {}, function (data, status) {
+    if (status != "success") return;
+    myFiles = data.files;
+    outputFiles();
   }, "json");
 }
 
@@ -442,12 +493,14 @@ $(document).ready(function() {
   });
 
   $("#usersLink").click(outputUsers);
+  $("#filesLink").click(outputFiles);
 
   //try joining the chat when the user clicks the connect button
   $("#connectButton").click(function () {
     //lock the UI while waiting for a response
     showLoad();
     var nick = $("#nickInput").attr("value");
+    var pass = $("#passInput").attr("value");
 
     //dont bother the backend if we fail easy validations
     if (nick.length > 50) {
@@ -468,7 +521,7 @@ $(document).ready(function() {
            , type: "GET" // XXX should be POST
            , dataType: "json"
            , url: "/join"
-           , data: { nick: nick }
+           , data: { nick: nick, pass: pass }
            , error: function () {
                alert("error connecting to server");
                showConnect();
@@ -478,10 +531,10 @@ $(document).ready(function() {
     return false;
   });
 
-  // update the daemon uptime every 10 seconds
+  // update the daemon uptime every 30 seconds
   setInterval(function () {
     updateUptime();
-  }, 10*1000);
+  }, 30*1000);
 
   if (CONFIG.debug) {
     $("#loading").hide();

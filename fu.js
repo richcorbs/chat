@@ -2,6 +2,8 @@ var createServer = require("http").createServer;
 var readFile = require("fs").readFile;
 var sys = require("sys");
 var url = require("url");
+var path = require('path');
+var fs = require('fs');
 DEBUG = false;
 
 var fu = exports;
@@ -15,14 +17,41 @@ function notFound(req, res) {
   res.end(NOT_FOUND);
 }
 
+function uploaded_file(req, res) {
+  var uri = url.parse(req.url).pathname;  
+  var filename = path.join(process.cwd(), uri); 
+  path.exists(filename, function(exists) {  
+    readFile(filename, "binary", function(err, file) {  
+      if(err) {  
+        res.writeHead(500, {"Content-Type": "text/plain"});  
+        res.write(err + "\n");  
+        res.end();  
+        return;  
+      }  
+      res.writeHead(200);  
+      res.write(file, "binary");  
+      res.end();  
+    });  
+  });  
+}
+
 var getMap = {};
 
 fu.get = function (path, handler) {
   getMap[path] = handler;
 };
+fu.post = function (path, handler) {
+  getMap[path] = handler;
+};
+ 
 var server = createServer(function (req, res) {
-  if (req.method === "GET" || req.method === "HEAD") {
-    var handler = getMap[url.parse(req.url).pathname] || notFound;
+  if (req.method === "GET" || req.method === "POST" || req.method === "HEAD") {
+    var handler = getMap[url.parse(req.url).pathname];
+    var request = url.parse(req.url, true);
+    
+    if (request.pathname.indexOf('/files/') == 0) handler = uploaded_file;
+
+    if (handler == null) handler = notFound;
 
     res.simpleText = function (code, body) {
       res.writeHead(code, { "Content-Type": "text/plain"

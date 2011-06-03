@@ -1,4 +1,5 @@
-Demo for node.js http://tinyclouds.org/node
+Simple group chat with file uploads.
 
-to run
+To run:
+
 $ /usr/local/bin/node server.js
