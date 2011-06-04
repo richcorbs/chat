@@ -19,6 +19,11 @@ role :app, host
 set :keep_releases, 5
 
 namespace :deploy do
+  
+  #desc "Symlink config files"
+  #task :symlink_configs, :roles => :app do
+  #  run "ln -sf #{shared_path}/config/#{f} #{release_path}/config/#{f}"
+  #end
 
   task :restart, :roles => :app, :except => { :no_release => true } do
     run "sudo restart #{application}"
