@@ -11,14 +11,17 @@ setInterval(function () {
 }, 20*1000);
 
 
-var fu         = require("./fu"),
+var crypto     = require('crypto'),
+    exec       = require("child_process").exec,
+    formidable = require ("formidable"),
+    fu         = require("./fu"),
     fs         = require("fs"),
     multipart  = require("multipart"),
+    os         = require("os"),
+    qs         = require("querystring"),
     sys        = require("sys"),
     url        = require("url"),
-    util       = require("util"),
-    formidable = require ("formidable"),
-    qs         = require("querystring");
+    util       = require("util");
 
 var MESSAGE_BACKLOG = 200,
     SESSION_TIMEOUT = 60 * 1000;
@@ -111,6 +114,19 @@ function createSession (nick) {
   return session;
 }
 
+function keyGen(key) {
+  var mystring = '';
+  if (key == 'github') {
+    mystring = os.hostname();
+  } else if (key == 'deploy') {
+    mystring = os.hostname().split("").reverse().join("");
+  }
+  var uniq_id = crypto.
+        createHash('md5').
+        update(mystring).
+        digest('hex');
+  return uniq_id
+}
 function upload_file(req, res) {
     //console.log('>>> start of upload');
     //console.log(req['headers']);
@@ -208,7 +224,7 @@ fu.get("/join", function (req, res) {
                       });
 });
 
-fu.post("/githubpush/81bb5309347727cdb871e3ad164acf18", function (req, res) {
+fu.post("/githubpush/" + keyGen('github'), function (req, res) {
   var body = '';
   req.addListener('data', function(chunk) {
     body += chunk;
@@ -226,7 +242,7 @@ fu.post("/githubpush/81bb5309347727cdb871e3ad164acf18", function (req, res) {
   });
 });
 
-fu.post("/deploynotice/ca1e280145877cd656bc69eb99d3a4c3", function (req, res) {
+fu.post("/deploynotice/" + keyGen('deploy'), function (req, res) {
   var body = '';
   req.addListener('data', function(chunk) {
     body += chunk;
