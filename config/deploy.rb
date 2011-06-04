@@ -1,6 +1,6 @@
 require "capistrano"
 
-set :application, "chat"
+set :application, 'chat'
 
 default_run_options[:pty] = true
 set :repository, "git@github.com:richcorbs/chat.git"
