@@ -1,25 +1,20 @@
-require "capistrano"
+require 'capistrano'
 
 set :application, 'chat'
-
-default_run_options[:pty] = true
-set :repository, "git@github.com:richcorbs/chat.git"
-set :scm, "git"
-set :deploy_via, :remote_cache
-
-set :user, "deploy"
+set :node_file, 'server.js'
+set :host, '50.56.115.86'
+set :user, 'deploy'
+set :admin_user, 'deploy'
 set :use_sudo, false
 set :port, 7785
 
+default_run_options[:pty] = true
+set :repository, 'git@github.com:richcorbs/chat.git'
+set :scm, 'git'
+set :deploy_via, :remote_cache
 set :deploy_to, "/u/chat"
 
-set :server_ips, {
-  :db03 => "50.56.115.86"
-}
-
-role :app, server_ips[:db03]
-role :web, server_ips[:db03]
-role :db,  server_ips[:db03], :primary => true
+role :app, host
 
 set :keep_releases, 5
 
@@ -27,15 +22,15 @@ after "deploy:update", "deploy:cleanup"
 
 namespace :deploy do
   task :start, :roles => :app, :except => { :no_release => true } do
-    run "sudo start #{application}_#{node_env}"
+    run "sudo start #{application}_production"
   end
 
   task :stop, :roles => :app, :except => { :no_release => true } do
-    run "sudo stop #{application}_#{node_env}"
+    run "sudo stop #{application}_production"
   end
 
   task :restart, :roles => :app, :except => { :no_release => true } do
-    run "sudo restart #{application}_#{node_env} || sudo start #{application}_#{node_env}"
+    run "sudo restart #{application}_production || sudo start #{application}_production"
   end
 
   task :create_deploy_to_with_sudo, :roles => :app do
@@ -53,15 +48,15 @@ namespace :deploy do
   script
       # We found $HOME is needed. Without it, we ran into problems
       export HOME="/home/#{admin_runner}"
-      export NODE_ENV="#{node_env}"
+      export NODE_ENV="production"
 
       cd #{current_path}
-      exec sudo -u #{admin_runner} sh -c "NODE_ENV=#{node_env} /usr/local/bin/node #{current_path}/#{node_file} #{application_port} >> #{shared_path}/log/#{node_env}.log 2>&1"
+      exec sudo -u #{admin_runner} sh -c "NODE_ENV=production /usr/local/bin/node #{current_path}/#{node_file} #{application_port} >> #{shared_path}/log/production.log 2>&1"
   end script
   respawn
 UPSTART
   put upstart_script, "/tmp/#{application}_upstart.conf"
-    run "sudo mv /tmp/#{application}_upstart.conf /etc/init/#{application}_#{node_env}.conf"
+    run "sudo mv /tmp/#{application}_upstart.conf /etc/init/#{application}_production.conf"
   end
 
   task :create_deploy_to_with_sudo, :roles => :app do
