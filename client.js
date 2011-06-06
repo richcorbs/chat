@@ -290,10 +290,10 @@ function longPoll (data) {
         CONFIG.last_message_time = message.timestamp;
 
       //dispatch new messages to their appropriate handlers
+      if(!CONFIG.focus){
+        CONFIG.unread++;
+      }
       switch (message.type) {
-        if(!CONFIG.focus){
-          CONFIG.unread++;
-        }
         case "msg":
           addMessage(message.nick, message.text, message.timestamp);
           break;
