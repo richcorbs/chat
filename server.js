@@ -219,7 +219,7 @@ fu.get("/join", function (req, res) {
   channel.appendMessage(session.nick, "join");
   res.simpleJSON(200, { id: session.id
                       , nick: session.nick
-                      , rss: mem.rss
+                      //, rss: mem.rss
                       , starttime: starttime
                       });
 });
