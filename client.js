@@ -447,7 +447,7 @@ function outputDeploy (msg) {
 //add a list of present chat members to the stream
 function outputUsers () {
   var nick_string = nicks.length > 0 ? nicks.join(", ") : "(none)";
-  addMessage("users:", nick_string, new Date(), "\"notice");
+  addMessage("users:", nick_string, new Date(), "notice");
   updateUsersLink();
   return false;
 }

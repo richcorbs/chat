@@ -54,6 +54,7 @@ a:hover { text-decoration: underline; color: #aaa; }
   width: 100%; 
   bottom: 0;
   background: #333;
+  padding:2px 0;
 }
 
 #entry {
@@ -79,10 +80,10 @@ table.message { width:100%; border-bottom:1px solid #444; }
 td.date { width:50px; }
 td.nick { width:75px; }
 .notice td, .join td, .part td, .message .date { color: #999; }
+.message .date { color: #505050; }
 .error td { color: #B00; }
-.personal .nick, .notice .nick { color: khaki; }
+.personal .nick, .notice .nick { color: #988; }
 
-input#uploadFile { background-color:#333; border: none; color: #333; margin-top:5px; }
 .message {
   margin: 0.1em 3px;
 }
