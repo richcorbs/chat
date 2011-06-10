@@ -236,7 +236,7 @@ fu.post("/githubpush/" + keyGen('github'), function (req, res) {
     for (var c in payload.commits) {
       who   = payload.commits[c].author.name;
       msg   = payload.commits[c].message;
-      console.log(who + ' committed \"' + msg + '\" to ' + repo + ' (' + after + ')');
+      console.log(who + ' committed \'' + msg + '\' to ' + repo + ' (' + after + ')');
       channel.appendMessage("github", "github", who + ' committed \"' + msg + '\" to ' + repo + ' (' + after + ')', "notice");
     }
   });
