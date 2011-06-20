@@ -8,6 +8,8 @@ var CONFIG = { debug: false
 
 var nicks   = [];
 var myFiles = [];
+var x       = new Date();
+var today   = x.getDate();
 
 //  CUT  ///////////////////////////////////////////////////////////////////
 /* This license and copyright apply to all code until the next "CUT"
@@ -534,6 +536,11 @@ $(document).ready(function() {
   // update the daemon uptime every 30 seconds
   setInterval(function () {
     updateUptime();
+    x = new Date();
+    if (x.getDate() != today) {
+      addMessage('System:',x.getMonth() + '/' + x.getDate(),null,'notice');
+      today = x.getDate();
+    }
   }, 30*1000);
 
   if (CONFIG.debug) {

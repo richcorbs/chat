@@ -50,7 +50,7 @@ a:hover { text-decoration: underline; color: #aaa; }
 
 #toolbar {
   position: fixed;
-  color: #fff;
+  color: #ccc;
   width: 100%; 
   bottom: 0;
   background: #333;

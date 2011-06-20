@@ -300,6 +300,8 @@ fu.get("/send", function (req, res) {
 
   session.poke();
 
+  // Add IRC-like commands here
+  // 
   channel.appendMessage(session.nick, "msg", text);
   res.simpleJSON(200, { rss: mem.rss });
 });
