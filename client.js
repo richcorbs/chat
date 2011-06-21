@@ -538,7 +538,7 @@ $(document).ready(function() {
     updateUptime();
     x = new Date();
     if (x.getDate() != today) {
-      addMessage('System:',x.getMonth() + '/' + x.getDate(),null,'notice');
+      addMessage('System:',x.getMonth() + 1 + '/' + x.getDate(),null,'notice');
       today = x.getDate();
     }
   }, 30*1000);
