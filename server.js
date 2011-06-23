@@ -23,6 +23,9 @@ var crypto     = require('crypto'),
     url        = require("url"),
     util       = require("util");
 
+var x          = new Date();
+var today      = x.getDate();
+
 var MESSAGE_BACKLOG = 200,
     SESSION_TIMEOUT = 60 * 1000;
 
@@ -76,10 +79,16 @@ var channel = new function () {
 
   // clear old callbacks
   // they can hang around for at most 30 seconds.
+  // also check for a new day to send the marker
   setInterval(function () {
     var now = new Date();
     while (callbacks.length > 0 && now - callbacks[0].timestamp > 30*1000) {
       callbacks.shift().callback([]);
+    }
+    x = new Date();
+    if (x.getDate() != today) {
+      channel.appendMessage('system', x.getMonth() + 1 + '/' + x.getDate(),null,'notice');
+      today = x.getDate();
     }
   }, 3000);
 };
