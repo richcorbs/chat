@@ -184,6 +184,7 @@ fu.listen(Number(process.env.PORT || PORT), HOST);
 fu.get("/", fu.staticHandler("index.html"));
 fu.get("/test.html", fu.staticHandler("test.html"));
 fu.get("/style.css", fu.staticHandler("style.css"));
+fu.get("/background.gif", fu.staticHandler("background.gif"));
 fu.get("/background.png", fu.staticHandler("background.png"));
 fu.get("/client.js", fu.staticHandler("client.js"));
 fu.get("/ajaxfileupload.js", fu.staticHandler("ajaxfileupload.js"));
