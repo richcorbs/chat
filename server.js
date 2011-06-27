@@ -96,7 +96,10 @@ function createSession (nick) {
 
   for (var i in sessions) {
     var session = sessions[i];
-    if (session && session.nick === nick) return null;
+    if (session && session.nick === nick) {
+      delete sessions[i];
+      channel.appendMessage(nick, "part");
+    }
   }
 
   var session = { 
