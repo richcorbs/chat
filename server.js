@@ -85,11 +85,6 @@ var channel = new function () {
     while (callbacks.length > 0 && now - callbacks[0].timestamp > 30*1000) {
       callbacks.shift().callback([]);
     }
-    x = new Date();
-    if (x.getDate() != today) {
-      channel.appendMessage('system', x.getMonth() + 1 + '/' + x.getDate(),null,'notice');
-      today = x.getDate();
-    }
   }, 3000);
 };
 
