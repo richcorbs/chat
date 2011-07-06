@@ -26,8 +26,8 @@ table {
 }
 
 
-a { text-decoration: none; color: #888; }
-a:hover { text-decoration: underline; color: #aaa; }
+a { text-decoration: none; color: #444; }
+a:hover { text-decoration: underline; color: #888; }
 
 #loading, #connect {
   background: #22252a;
@@ -79,10 +79,10 @@ a:hover { text-decoration: underline; color: #aaa; }
 table.message { width:100%; border-bottom:1px solid #2b2b2b; }
 td.date { width:50px; }
 td.nick { width:75px; }
-.notice td, .join td, .part td, .message .date { color: #999; }
+.notice td, .join td, .part td, .message .date { color: #444; }
 .message .date { color: #383838; }
 .error td { color: #B00; }
-.personal .nick, .notice .nick { color: #988; }
+.personal .nick, .notice .nick { color: #444; }
 
 .message {
   margin: 0.1em 3px;
